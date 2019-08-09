@@ -1,34 +1,53 @@
 package com.wigner.api;
 
-import org.springframework.beans.factory.annotation.Value;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
-import com.wigner.api.utis.SenhaUtils;
+import com.wigner.api.entities.Empresa;
+import com.wigner.api.repositorios.EmpresaRepository;
+
+
 
 @SpringBootApplication
 public class MeuPrimeiroProjetoApplication {
 
-	/*
-	 * @Value ( "${paginacao.qtd_por_pagina}" ) private int qtdPorPagina ;
-	 */
-	
 	public static void main(String[] args) {
 		SpringApplication.run(MeuPrimeiroProjetoApplication.class, args);
 	}
 
+	@Autowired
+	private EmpresaRepository empresaRepository;
+	
 	@Bean
 	public CommandLineRunner commandLineRunner() {
 		return args -> {
-			String senhaEncoded = SenhaUtils.gerarBCrypt("123456");
-			System.out.println("Senha encode:" + senhaEncoded);
+			Empresa empresa = new Empresa();
+			empresa.setRazaoSocial("Wigner IT");
+			empresa.setCnpj("74645215000104");
 			
-			senhaEncoded = SenhaUtils.gerarBCrypt("123456");
-			System.out.println("Senha endcoded novamente:" + senhaEncoded);
+			this.empresaRepository.save(empresa);
+
+			List<Empresa> empresas = empresaRepository.findAll();
+			empresas.forEach(System.out::println);
 			
-			System.out.println("Senha válida: " + SenhaUtils.senhaValida("123456", senhaEncoded));
+			Empresa empresaDb = empresaRepository.findOne(1L);
+			System.out.println("Empresa por ID: " + empresaDb);
+			
+			empresaDb.setRazaoSocial("Kazale IT Web");
+			this.empresaRepository.save(empresaDb);
+
+			Empresa empresaCnpj = empresaRepository.findByCnpj("74645215000104");
+			System.out.println("Empresa por CNPJ: " + empresaCnpj);
+			
+			this.empresaRepository.delete(1L);
+			empresas = empresaRepository.findAll();
+			System.out.println("Empresas: " + empresas.size());
+			
 		};
 	}
 	
